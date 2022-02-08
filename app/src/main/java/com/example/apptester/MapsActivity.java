@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,16 +42,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-
-    /**
      * Καλείται όταν ο χάρτης είναι έτοιμος για χρήση
      */
 
@@ -65,22 +56,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
 
+                /**-----Communicate with the provider of the other app-----*/
                 ContentResolver resolver = getContentResolver();
+
                 Uri uri = Uri.parse("content://com.example.ergtserpe/COORDINATE");
+
+                /**-----Cursor to get the list of geofence-----*/
                 Cursor cursor = resolver.query(uri,null,null,null,null);
                 if (cursor.moveToFirst()){
                     do{
 
+                        /**-----Add Marker-----*/
                         LatLng userLocation = new LatLng( cursor.getDouble(1), cursor.getDouble(2));
-                        mMap.addMarker(new MarkerOptions().position(userLocation));
+                        mMap.addMarker(new MarkerOptions().position(userLocation)).setTitle(userLocation.latitude+","+userLocation.longitude);
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation));
 
-
+                        /**-----Debug-----*/
                         Log.d("Cursor", cursor.getString(1));
+
                     }while(cursor.moveToNext());
                 }else{
+
+                    Toast.makeText(MapsActivity.this, "No items in the DataBase", Toast.LENGTH_SHORT).show();
                     Log.d("error", "run: no items in the cursor");
+
                 }
+
                 cursor.close();
             }
 
